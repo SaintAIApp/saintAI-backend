@@ -2,7 +2,6 @@ import mongoose from "mongoose";
 
 export const mongoConnect = async (uri: string) => {
   try {
-    console.log(uri);
     const { connection } = await mongoose.connect(uri, {
       dbName: "SaintAIDB",
     });
