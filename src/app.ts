@@ -19,4 +19,10 @@ app.all("*", (req, res, next) => {
 
 app.use(globalErrorHandler);
 
+process.on("uncaughtException", (err: any) => {
+    console.log("Uncaught Exception, shutting down...");
+    console.log(err.name, err.message);
+    process.exit(1);
+});
+
 export default app;

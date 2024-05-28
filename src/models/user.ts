@@ -9,6 +9,8 @@ export interface IUser extends Document {
   email: string;
   password: string;
   isActive: boolean;
+  otp: number | undefined;
+  otp_expire: Date | undefined;
   comparePassword(enteredPassword: string): Promise<boolean>;
   generateToken(): string;
 }
@@ -32,6 +34,14 @@ const userSchema = new Schema<IUser>({
     type: Boolean,
     default: false,
   },
+  otp: {
+    type: Number,
+    default: undefined
+  },
+  otp_expire: {
+    type: Date,
+    default: undefined
+  }
 },{
   timestamps:true
 });
