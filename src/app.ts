@@ -1,12 +1,17 @@
 import express from 'express'
-
-import userRouter from "./routers/user"
 import globalErrorHandler from './controllers/error';
+import bodyParser from 'body-parser';
+import userRouter from "./routers/user"
+import paymentRouter from "./routers/payment"
 
 const app = express();
-app.use(express.json());
+
+app.use('/api/v1/payment/webhook', express.raw({ type: 'application/json' }));
+
+app.use(bodyParser.json());
 
 app.use("/api/v1/user", userRouter);
+app.use("/api/v1/payment", paymentRouter)
 
 
 // Unhandled Routes:
