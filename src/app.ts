@@ -3,13 +3,14 @@ import globalErrorHandler from './controllers/error';
 import bodyParser from 'body-parser';
 import userRouter from "./routers/user"
 import paymentRouter from "./routers/payment"
-
+import cors from 'cors'
 const app = express();
 
+app.use(cors());
 app.use('/api/v1/payment/webhook', express.raw({ type: 'application/json' }));
 
 app.use(bodyParser.json());
-
+app.get("/",(req,res)=>res.send("Hello from SAINTAI"))
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/payment", paymentRouter)
 

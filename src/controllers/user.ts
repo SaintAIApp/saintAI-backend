@@ -34,9 +34,9 @@ export const login = catchAsync(async (req: Request, res: Response, next: NextFu
 export const verifyUser = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const {otp} = req.body;
 
-    const user = await UserServices.verifyUser(otp);
+    const response = await UserServices.verifyUser(otp);
 
-    return sendResponse(res, 200, user);
+    return sendResponse(res, 200, {user:response?.user,token:response?.token});
 });
 
 export const changePassword = catchAsync(async (req: CustomRequest, res: Response, next: NextFunction) => {
