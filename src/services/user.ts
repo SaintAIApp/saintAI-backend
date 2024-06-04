@@ -142,6 +142,12 @@ class UserServices {
 
         return user;
     }
+    async deleteAccount(userId:string){
+        const user = await User.findByIdAndDelete(userId);
+        if(!user)
+            throw new AppError(404,"User not found");
+        return user;
+    }
 
 }
 
