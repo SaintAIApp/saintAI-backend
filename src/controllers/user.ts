@@ -10,7 +10,6 @@ export const signup = catchAsync(async (req: Request, res: Response, next: NextF
     if(!username || !email || !password) {
         return next(new AppError(404, "Please provide Username, Email and Password"));
     }
-
     const user = await UserServices.signup(username, email, password);
 
     return sendResponse(res, 200, user);
@@ -80,3 +79,18 @@ export const resetPassword = catchAsync(async (req: CustomRequest, res: Response
 
     return sendResponse(res, 200, user);
 })
+
+export const deleteAccount = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const userId = req.params.userId;
+
+    if (!userId)
+      return next(new AppError(400, "Please provide userId"));
+
+    const user = await UserServices.deleteAccount(userId);
+
+    if(user === null) {
+        throw new AppError(501, "Unable to delete please retry");
+    }
+
+    return sendResponse(res, 202,user);
+});
