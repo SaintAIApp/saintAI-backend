@@ -34,10 +34,8 @@ class PaymentServices {
                 }
 
                 const validDate = new Date(Date.now() + 30)
-                console.log(validDate);
                 
                 const plan = session?.metadata.plan
-                console.log(plan);
 
                 const stripeDetails = await StripeDetails.create({
                     userId: session?.metadata?.userId,
@@ -49,13 +47,39 @@ class PaymentServices {
                 await stripeDetails.save();
 
                 break;
+            case "invoice.payment_succeeded": 
+                const invoice = event.data.object as Stripe.Invoice;
+
+                const subscriptionDetails = invoice.subscription_details;
+                console.log(subscriptionDetails?.metadata);
+
+                const prevStripeDetails = await StripeDetails.findOne({userId: subscriptionDetails?.metadata?.userId}); 
+
+                if(prevStripeDetails) {
+                    prevStripeDetails.validUntil = new Date(Date.now()+30);
+                    await prevStripeDetails.save();
+                }
+                break;
+            case "invoice.payment_failed":
+                const failedInvoice = event.data.object as Stripe.Invoice;
+                const failedSubscriptionDetails = failedInvoice.subscription_details;
+                console.log(failedSubscriptionDetails?.metadata);
+
+                const failedPrevStripeDetails = await StripeDetails.findOne({userId: failedSubscriptionDetails?.metadata?.userId}); 
+
+                if(failedPrevStripeDetails) {
+                    failedPrevStripeDetails.validUntil = new Date(Date.now());
+                    await failedPrevStripeDetails.save();
+                }
+                break; 
             default:
                 console.log(`Unhandled event type ${event.type}`);
         }
     }
 
     async createCheckout(plan: string, userId: ObjectId, customerId: string | undefined): Promise<string | null> {
-        const priceId = plan === "pro" ? process.env.STRIPR_PRODUCT_ID_PRO : process.env.STRIPR_PRODUCT_ID_PRO_PLUS;
+        //const priceId = plan === "pro" ? process.env.STRIPR_PRODUCT_ID_PRO : process.env.STRIPR_PRODUCT_ID_PRO_PLUS;
+        const priceId = "price_1POYaxSE7wxYxsJIJ0dElRlE";
 
         let sessionOptions: Stripe.Checkout.SessionCreateParams = {
             mode: "subscription",
