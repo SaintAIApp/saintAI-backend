@@ -57,7 +57,7 @@ class UserServices {
         return user;
     }
 
-    async verifyUser(otp: number): Promise<IUser | null> {
+    async verifyUser(otp: number): Promise<{user:IUser,token:string} | null> {
         const user = await User.findOne({
             otp,
             otp_expire: {
@@ -71,11 +71,11 @@ class UserServices {
         user.otp = undefined
         user.otp_expire = undefined
         user.isActive = true
-
+        const token = user.generateToken();
         await user.save()
         console.log(user);
         
-        return user;
+        return {user,token};
     }
 
     async changePassword(id: ObjectId, oldPassword: string, newPassword: string): Promise<IUser | null> {
@@ -140,6 +140,12 @@ class UserServices {
 
         await user.save()
 
+        return user;
+    }
+    async deleteAccount(userId:string){
+        const user = await User.findByIdAndDelete(userId);
+        if(!user)
+            throw new AppError(404,"User not found");
         return user;
     }
 
