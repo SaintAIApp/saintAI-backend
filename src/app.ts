@@ -1,8 +1,9 @@
 import express from 'express'
 import globalErrorHandler from './controllers/error';
 import bodyParser from 'body-parser';
-import userRouter from "./routers/user"
-import paymentRouter from "./routers/payment"
+import userRouter from "./routers/user";
+import paymentRouter from "./routers/payment";
+import uploadRouter from "./routers/upload";
 
 const app = express();
 
@@ -12,7 +13,7 @@ app.use(bodyParser.json());
 
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/payment", paymentRouter)
-
+app.use("/api/v1/upload", uploadRouter)
 
 // Unhandled Routes:
 app.all("*", (req, res, next) => {
