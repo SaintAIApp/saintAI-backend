@@ -78,8 +78,8 @@ class PaymentServices {
     }
 
     async createCheckout(plan: string, userId: ObjectId, customerId: string | undefined): Promise<string | null> {
-        //const priceId = plan === "pro" ? process.env.STRIPR_PRODUCT_ID_PRO : process.env.STRIPR_PRODUCT_ID_PRO_PLUS;
-        const priceId = "price_1POYaxSE7wxYxsJIJ0dElRlE";
+        const priceId = plan === "pro" ? process.env.STRIPR_PRODUCT_ID_PRO : process.env.STRIPR_PRODUCT_ID_PRO_PLUS;
+        // const priceId = "price_1POYaxSE7wxYxsJIJ0dElRlE";
 
         let sessionOptions: Stripe.Checkout.SessionCreateParams = {
             mode: "subscription",
