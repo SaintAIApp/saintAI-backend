@@ -3,6 +3,7 @@ import globalErrorHandler from './controllers/error';
 import bodyParser from 'body-parser';
 import userRouter from "./routers/user"
 import paymentRouter from "./routers/payment"
+import uploadRouter from './routers/upload'
 import cors from 'cors'
 const app = express();
 
@@ -13,7 +14,7 @@ app.use(bodyParser.json());
 app.get("/",(req,res)=>res.send("Hello from SAINTAI"))
 app.use("/api/v1/user", userRouter);
 app.use("/api/v1/payment", paymentRouter)
-
+app.use("/api/v1/upload", uploadRouter)
 
 // Unhandled Routes:
 app.all("*", (req, res, next) => {
