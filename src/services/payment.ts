@@ -10,7 +10,7 @@ class PaymentServices {
 
         console.log("body: ", body);
         console.log("sig: ", sig);
-        console.log("web secert: ", process.env.STRIPE_WEB_SECRET);
+        // console.log("web secert: ", process.env.STRIPE_WEB_SECRET);
         try {
             event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEB_SECRET as string);
         } catch (err: any) {
@@ -65,8 +65,8 @@ class PaymentServices {
                 quantity: 1,
               },
             ],
-            success_url: `http://localhost:3000/`,
-            cancel_url: `http://localhost:3000/`,
+            success_url: `${process.env.CLIENT_URL}/payment/success`,
+            cancel_url: `${process.env.CLIENT_URL}/payment/failed`,
             metadata: {
                 userId: userId.toString(),
                 plan: plan
