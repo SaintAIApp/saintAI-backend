@@ -8,6 +8,7 @@ export interface IUser extends Document {
   username: string;
   email: string;
   password: string;
+  groupId: ObjectId;
   isActive: boolean;
   otp: number | undefined;
   otp_expire: Date | undefined;
@@ -29,6 +30,11 @@ const userSchema = new Schema<IUser>({
   password: {
     type: String,
     required: [true, "Password is required"],
+  },
+  groupId: {
+    type: Schema.Types.ObjectId,
+    ref: "Group",
+    required: [true, "User needs to be associated with a group"],
   },
   isActive: {
     type: Boolean,

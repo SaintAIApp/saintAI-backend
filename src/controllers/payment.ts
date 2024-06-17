@@ -4,6 +4,7 @@ import PaymentServices from '../services/payment'
 import AppError from "../utils/AppError";
 import { CustomRequest } from "../middlewares/auth";
 import StripeDetails from "../models/stripeDetails";
+import PaymentDetails from "../models/paymentDetails";
 
 export const onPayment = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const sig = req.headers["stripe-signature"]
@@ -35,4 +36,14 @@ export const createCheckout = catchAsync(async (req: CustomRequest, res: Respons
     }
 
     return sendResponse(res, 200, url);
+});
+
+export const cancelSubscription = catchAsync(async (req: CustomRequest, res: Response, next: NextFunction) => {
+    const userId = req.user._id;
+
+    await PaymentServices.cancelSubscription(userId);
+
+    return sendResponse(res, 200, {
+        message: "Successfully unsubscribed from saint.ai"
+    })
 });
