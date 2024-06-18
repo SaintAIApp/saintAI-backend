@@ -19,7 +19,7 @@ const cryptoDetailsSchema = new Schema<ICryptoDetails>({
     },
     networkName: {
         type: String,
-        enum: ["SOLAN", "ETHEREUM"],
+        enum: ["SOLANA", "ETHEREUM"],
         required: true,
     },
     chainId: {

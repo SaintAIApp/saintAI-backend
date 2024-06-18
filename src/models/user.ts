@@ -20,7 +20,6 @@ const userSchema = new Schema<IUser>({
   username: {
     type: String,
     unique: true,
-    required: [true, "Username of the user is required"],
   },
   email: {
     type: String,
@@ -29,7 +28,6 @@ const userSchema = new Schema<IUser>({
   },
   password: {
     type: String,
-    required: [true, "Password is required"],
   },
   groupId: {
     type: Schema.Types.ObjectId,
