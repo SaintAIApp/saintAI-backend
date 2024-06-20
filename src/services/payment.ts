@@ -3,6 +3,7 @@ import AppError from "../utils/AppError";
 import { ObjectId } from "mongoose";
 import Stripe from "stripe";
 import StripeDetails from "../models/stripeDetails";
+import PaymentDetails from "../models/paymentDetails";
 
 class PaymentServices {
     async onPayment(sig: string | string[], body: any) {
@@ -34,13 +35,21 @@ class PaymentServices {
 
                 const validDate = new Date(Date.now() + 30)
                 
-                const plan = session?.metadata.plan
+                const plan = session?.metadata.plan;
+
+                const paymentDetails = await PaymentDetails.create({
+                    userId: session?.metadata?.userId,
+                    plan: plan,
+                    validUntil: validDate,
+                    paymentMode: "STRIPE"
+                });
+
+                await paymentDetails.save();
 
                 const stripeDetails = await StripeDetails.create({
                     userId: session?.metadata?.userId,
-                    validUntil: validDate,
-                    plan: plan,
-                    customerId: session?.customer
+                    customerId: session?.customer,
+                    subscriptionId: session?.subscription,
                 });
 
                 await stripeDetails.save();
@@ -52,11 +61,11 @@ class PaymentServices {
                 const subscriptionDetails = invoice.subscription_details;
                 console.log(subscriptionDetails?.metadata);
 
-                const prevStripeDetails = await StripeDetails.findOne({userId: subscriptionDetails?.metadata?.userId}); 
+                const newPaymentDetails = await PaymentDetails.findOne({userId: subscriptionDetails?.metadata?.userId}); 
 
-                if(prevStripeDetails) {
-                    prevStripeDetails.validUntil = new Date(Date.now()+30);
-                    await prevStripeDetails.save();
+                if(newPaymentDetails) {
+                    newPaymentDetails.validUntil = new Date(Date.now()+30);
+                    await newPaymentDetails.save();
                 }
                 break;
             case "invoice.payment_failed":
@@ -64,11 +73,11 @@ class PaymentServices {
                 const failedSubscriptionDetails = failedInvoice.subscription_details;
                 console.log(failedSubscriptionDetails?.metadata);
 
-                const failedPrevStripeDetails = await StripeDetails.findOne({userId: failedSubscriptionDetails?.metadata?.userId}); 
+                const failedPaymentDetails = await PaymentDetails.findOne({userId: failedSubscriptionDetails?.metadata?.userId}); 
 
-                if(failedPrevStripeDetails) {
-                    failedPrevStripeDetails.validUntil = new Date(Date.now());
-                    await failedPrevStripeDetails.save();
+                if(failedPaymentDetails) {
+                    failedPaymentDetails.validUntil = new Date(Date.now());
+                    await failedPaymentDetails.save();
                 }
                 break; 
             default:
@@ -78,7 +87,6 @@ class PaymentServices {
 
     async createCheckout(plan: string, userId: ObjectId, customerId: string | undefined): Promise<string | null> {
         const priceId = plan === "pro" ? process.env.STRIPR_PRODUCT_ID_PRO : process.env.STRIPR_PRODUCT_ID_PRO_PLUS;
-        // const priceId = "price_1POYaxSE7wxYxsJIJ0dElRlE";
 
         let sessionOptions: Stripe.Checkout.SessionCreateParams = {
             mode: "subscription",
@@ -108,6 +116,27 @@ class PaymentServices {
             console.log(e.message);
             throw new AppError(500, "Error while creating checkout session");
         }
+    }
+
+    async cancelSubscription(userId: ObjectId) {
+        const paymentDetails = await PaymentDetails.findOne({userId: userId});
+
+        if(!paymentDetails) {
+            throw new AppError(500, "User Payment Details does not exist");
+        }
+
+        if(paymentDetails.paymentMode === "STRIPE") {
+            const stripeDetails = await StripeDetails.findOne({userId: userId});
+
+            if(!stripeDetails) {
+                throw new AppError(500, "Error user stripe details does not exist");
+            }
+
+            await stripe.subscriptions.cancel(stripeDetails.subscriptionId);
+        }
+
+        paymentDetails.validUntil = new Date(Date.now());
+        await paymentDetails.save();
     }
 }
 

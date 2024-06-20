@@ -3,7 +3,14 @@ import User, { IUser } from "../models/user";
 import AppError from "../utils/AppError";
 import { sendmail } from "../utils/sendMail";
 import { ObjectId } from "mongoose";
+
 import StripeDetails from "../models/stripeDetails";
+
+import CryptoDetails from "../models/cryptoDetails";
+import Group from "../models/groups";
+import Feature from "../models/features";
+import UserFeatureUsage from "../models/userFeatureUsage";
+
 
 class UserServices {
     async getDetails(userId:string){
@@ -27,17 +34,30 @@ class UserServices {
         const randomNumber = Math.random() * (999999-100000) + 100000 
         const OTP = Math.floor(randomNumber)
         const opt_expire = 15 * 60 * 1000;
-        const expiredDate = new Date(Date.now() + opt_expire);
+        const expireDate = new Date(Date.now() + opt_expire);
+        const group = await Group.findOne({name: "Free"});
 
         const newUser = await User.create({
             username: username,
             email: email,
             password: password,
+            groupId: group?._id,
             otp: OTP,
-            otp_expire: expiredDate
+            otp_expire: expireDate
         });
 
         await newUser.save();
+
+        const features = await Feature.find({});
+
+        features.map(async (feature) => {
+            const newUserFeatureUsage = await UserFeatureUsage.create({
+                userId: newUser._id,
+                featureId: feature._id,
+                usage: 0,
+            })
+            await newUserFeatureUsage.save();
+        });
 
         const mailOptions: SendMailOptions = {
             from: process.env.ADMIN_EMAIL,
@@ -65,6 +85,27 @@ class UserServices {
         }
 
         return user;
+    }
+
+    async signinWithCrypto(walletAddress: string, networkName: string, chainId: number): Promise<IUser | null>  {
+        const cryptoDetails = await CryptoDetails.findOne({walletAddress, networkName, chainId});
+
+        if(cryptoDetails) {
+            const user = await User.findById(cryptoDetails.userId);
+            return user;
+        }
+        const group = await Group.findOne({name: "Free"});
+
+        const newUser = await User.create({
+            groupId: group?._id
+        });
+
+        await newUser.save();
+
+        const newCryptoDetails = await CryptoDetails.create({walletAddress, networkName, chainId, userId: newUser._id});
+        await newCryptoDetails.save();
+
+        return newUser;
     }
 
     async verifyUser(otp: number): Promise<{user:IUser,token:string} | null> {

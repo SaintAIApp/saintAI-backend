@@ -39,6 +39,22 @@ export const login = catchAsync(async (req: Request, res: Response, next: NextFu
     return sendToken(res, 200, "Logged in", user);
 });
 
+export const signinWithCrypto = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const {walletAddress, networkName, chainId} = req.body;
+
+    if(!walletAddress || !["SOLANA", "ETHEREUM"].includes(networkName) || !chainId) {
+        throw new AppError(500, "Please provide all crypto details(walletAddress, networkName, chainId)");
+    }
+
+    const user = await UserServices.signinWithCrypto(walletAddress, networkName, chainId);
+
+    if(user === null) {
+        throw new AppError(501, "Unable to login please retry");
+    }
+
+    return sendToken(res, 200, "Logged in with crypto wallet", user);
+});
+
 export const verifyUser = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const {otp} = req.body;
 

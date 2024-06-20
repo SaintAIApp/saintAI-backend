@@ -3,6 +3,7 @@ import { CustomRequest } from "../middlewares/auth"
 import { catchAsync, sendResponse } from "../utils/api.util"
 import AppError from "../utils/AppError";
 import UploadService from '../services/upload';
+import { incrementUploadCount } from "../utils/checkLimits";
 
 const allowedFileTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/msword', 'text/csv'];
 
@@ -20,6 +21,8 @@ export const addFile = catchAsync(async (req: CustomRequest, res: Response, next
     const {name} = req.body;
 
     const file = await UploadService.addFile(req.file, req.user, name);
+    
+    await incrementUploadCount(req.user, req.body.featureId)
     
     return sendResponse(res, 201, file);
 });
