@@ -1,9 +1,9 @@
 import { Router } from "express";
-import { changePassword, forgotPassword, login, resetPassword, signup, verifyUser,deleteAccount } from "../controllers/user";
+import { changePassword, forgotPassword, login, resetPassword, signup, verifyUser,deleteAccount,getUserDetails } from "../controllers/user";
 import { isAuthenticated } from "../middlewares/auth";
 
 const router = Router();
-
+router.get("/details/:userId",isAuthenticated,getUserDetails);
 router.post("/login", login);
 router.post("/signup", signup);
 router.post("/verify-user", verifyUser);

@@ -3,8 +3,18 @@ import User, { IUser } from "../models/user";
 import AppError from "../utils/AppError";
 import { sendmail } from "../utils/sendMail";
 import { ObjectId } from "mongoose";
+import StripeDetails from "../models/stripeDetails";
 
 class UserServices {
+    async getDetails(userId:string){
+        const user = await User.findById(userId);
+        if(!user)
+            throw new AppError(404,"User does not exists");
+        const subscriptionData =await  StripeDetails.find({userId});
+        console.log(user)
+        console.log(subscriptionData)
+        return {userData:user,subscriptionData:subscriptionData}
+    }
     async signup(username: string, email: string, password: string) : Promise<IUser | null>{
         const user = await User.findOne({
             $or: [{ username: username }, { email: email }],

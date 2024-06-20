@@ -4,6 +4,15 @@ import AppError from "../utils/AppError";
 import UserServices from '../services/user'
 import { CustomRequest } from "../middlewares/auth";
 
+export const getUserDetails = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const userId= req.params.userId;
+    if(!userId) {
+        return next(new AppError(400, "Please provide UserId"));
+    }
+    const userDetails = await UserServices.getDetails(userId);
+
+    return sendResponse(res, 200, userDetails);
+})
 export const signup = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const {username, email, password } = req.body;
 

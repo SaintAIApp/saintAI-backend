@@ -7,9 +7,8 @@ import StripeDetails from "../models/stripeDetails";
 class PaymentServices {
     async onPayment(sig: string | string[], body: any) {
         let event;
-
-        console.log("body: ", body);
-        console.log("sig: ", sig);
+        // console.log("body: ", body);
+        // console.log("sig: ", sig);
         // console.log("web secert: ", process.env.STRIPE_WEB_SECRET);
         try {
             event = stripe.webhooks.constructEvent(body, sig, process.env.STRIPE_WEB_SECRET as string);
@@ -17,7 +16,7 @@ class PaymentServices {
             console.log(err.message);
             throw new AppError(500, "Error occured during payment") 
         }
-
+        console.log(event)
         // Handle the event
         switch (event.type) {
             case 'checkout.session.completed':
