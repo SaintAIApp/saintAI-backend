@@ -14,12 +14,10 @@ import UserFeatureUsage from "../models/userFeatureUsage";
 
 class UserServices {
     async getDetails(userId:string){
-        const user = await User.findById(userId);
+        const user = await User.findById(userId)?.select("username email isActive createdAt");;
         if(!user)
             throw new AppError(404,"User does not exists");
-        const subscriptionData =await  StripeDetails.find({userId});
-        console.log(user)
-        console.log(subscriptionData)
+        const subscriptionData =await  StripeDetails.find({userId})
         return {userData:user,subscriptionData:subscriptionData}
     }
     async signup(username: string, email: string, password: string) : Promise<IUser | null>{

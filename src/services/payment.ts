@@ -32,8 +32,9 @@ class PaymentServices {
                 if(customerId === null || !session?.metadata?.userId) {
                     throw new AppError(500, "Error customer not found");
                 }
+                const numberOfDays = 30;
 
-                const validDate = new Date(Date.now() + 30)
+                const validDate = new Date(Date.now() + (numberOfDays * 24 * 60 * 60 * 1000))
                 
                 const plan = session?.metadata.plan;
 
@@ -64,7 +65,8 @@ class PaymentServices {
                 const newPaymentDetails = await PaymentDetails.findOne({userId: subscriptionDetails?.metadata?.userId}); 
 
                 if(newPaymentDetails) {
-                    newPaymentDetails.validUntil = new Date(Date.now()+30);
+                    
+                    newPaymentDetails.validUntil = new Date(Date.now()+(30 * 24 * 60 * 60 * 1000) );
                     await newPaymentDetails.save();
                 }
                 break;
@@ -120,7 +122,7 @@ class PaymentServices {
 
     async cancelSubscription(userId: ObjectId) {
         const paymentDetails = await PaymentDetails.findOne({userId: userId});
-
+        console.log(userId)
         if(!paymentDetails) {
             throw new AppError(500, "User Payment Details does not exist");
         }
