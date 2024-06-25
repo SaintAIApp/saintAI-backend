@@ -20,10 +20,12 @@ const userSchema = new Schema<IUser>({
   username: {
     type: String,
     unique: true,
+    sparse: true,
   },
   email: {
     type: String,
     unique: true,
+    sparse: true,
     validate: validator.isEmail,
   },
   password: {
