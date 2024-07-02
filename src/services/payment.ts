@@ -4,8 +4,8 @@ import { ObjectId } from "mongoose";
 import Stripe from "stripe";
 import StripeDetails from "../models/stripeDetails";
 import PaymentDetails from "../models/paymentDetails";
-import Group from "../models/groups";
 import User from "../models/user";
+import Group from "../models/groups";
 
 class PaymentServices {
     async onPayment(sig: string | string[], body: any) {
@@ -18,11 +18,12 @@ class PaymentServices {
         } catch (err: any) {
             console.log(err.message);
             throw new AppError(500, "Error occured during payment") 
-        }
-        console.log(event)
+        }        
         // Handle the event
         switch (event.type) {
             case 'checkout.session.completed':
+                console.log('From server: checkout.session.completed');
+                
                 const session = await stripe.checkout.sessions.retrieve(
                     event.data.object.id,
                     {
@@ -38,14 +39,23 @@ class PaymentServices {
 
                 const validDate = new Date(Date.now() + (numberOfDays * 24 * 60 * 60 * 1000))
                 const plan = session?.metadata.plan;
-                const userId = session?.metadata.userId;
+                
+                const user = await User.findById(session?.metadata?.userId);
+
+                const group = await Group.findOne({name: plan});
+                if(!user || !group) {
+                    throw new AppError(500, "Error customer not found");
+                }
+
+                user.groupId = group._id;
+                await user.save()
+
                 const paymentDetails = await PaymentDetails.create({
                     userId: session?.metadata?.userId,
                     plan,
                     validUntil: validDate,
                     paymentMode: "STRIPE"
                 });
-
                 await paymentDetails.save();
 
                 const stripeDetails = await StripeDetails.create({
@@ -74,10 +84,12 @@ class PaymentServices {
 
                 break;
             case "invoice.payment_succeeded": 
+            console.log("From server: invoice.payment_succeeded");
+            
                 const invoice = event.data.object as Stripe.Invoice;
 
                 const subscriptionDetails = invoice.subscription_details;
-                console.log(subscriptionDetails?.metadata);
+                console.log("From Inovice payment succeeded, subscriptionDetails metadata: "+subscriptionDetails?.metadata);
 
                 const newPaymentDetails = await PaymentDetails.findOne({userId: subscriptionDetails?.metadata?.userId}); 
 
@@ -88,9 +100,11 @@ class PaymentServices {
                 }
                 break;
             case "invoice.payment_failed":
+                console.log("invoice.payment_failed");
+                
                 const failedInvoice = event.data.object as Stripe.Invoice;
                 const failedSubscriptionDetails = failedInvoice.subscription_details;
-                console.log(failedSubscriptionDetails?.metadata);
+                console.log("From Inovice payment failed, subscriptionDetails metadata: "+failedSubscriptionDetails?.metadata);
 
                 const failedPaymentDetails = await PaymentDetails.findOne({userId: failedSubscriptionDetails?.metadata?.userId}); 
 

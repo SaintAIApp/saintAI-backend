@@ -50,17 +50,6 @@ class UserServices {
 
         await newUser.save();
 
-        const features = await Feature.find({});
-
-        features.map(async (feature) => {
-            const newUserFeatureUsage = await UserFeatureUsage.create({
-                userId: newUser._id,
-                featureId: feature._id,
-                usage: 0,
-            })
-            await newUserFeatureUsage.save();
-        });
-
         const mailOptions: SendMailOptions = {
             from: process.env.ADMIN_EMAIL,
             to: email,
@@ -99,7 +88,8 @@ class UserServices {
         const group = await Group.findOne({name: "Free"});
 
         const newUser = await User.create({
-            groupId: group?._id
+            groupId: group?._id,
+            isActive: true,
         });
 
         await newUser.save();

@@ -3,7 +3,7 @@ import { CustomRequest } from "../middlewares/auth"
 import { catchAsync, sendResponse } from "../utils/api.util"
 import AppError from "../utils/AppError";
 import UploadService from '../services/upload';
-import { incrementUploadCount } from "../utils/checkLimits";
+import { incrementFeatureUsageCount } from "../utils/checkLimits";
 
 const allowedFileTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/msword', 'text/csv'];
 
@@ -22,7 +22,7 @@ export const addFile = catchAsync(async (req: CustomRequest, res: Response, next
 
     const file = await UploadService.addFile(req.file, req.user, name);
     
-    await incrementUploadCount(req.user, req.body.featureId)
+    await incrementFeatureUsageCount(req.user, req.body.featureId)
     
     return sendResponse(res, 201, file);
 });
@@ -62,4 +62,29 @@ export const deleteFile = catchAsync(async (req: Request, res: Response, next: N
     const file = await UploadService.deleteFile(uploadId);
 
     return sendResponse(res, 200, file);
+});
+
+export const sendChat = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const {message} = req.body;
+    const {uploadId} = req.params;
+
+    if(!message || !uploadId) {
+        return next(new AppError(400, "Please enter a message and uploadId"));
+    }
+
+    const assistantResponse = await UploadService.sendMessage(message, uploadId);
+
+    return sendResponse(res, 200, assistantResponse);
+});
+
+export const getChatHistory = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const {uploadId} = req.params;
+
+    if(!uploadId) {
+        return next(new AppError(400, "Please enter a message and uploadId"));
+    }
+
+    const chatHistory = await UploadService.getChatHistory(uploadId);
+
+    return sendResponse(res, 200, chatHistory);
 });

@@ -5,6 +5,7 @@ export interface IUpload extends Document {
     name: string;
     fileKey: string;
     fileUrl: string;
+    agentId: string;
 }
 
 const uploadSchema = new Schema<IUpload>({
@@ -24,7 +25,13 @@ const uploadSchema = new Schema<IUpload>({
     fileUrl: {
         type: String,
     },
+    agentId: {
+        type: String,
+        required: true,
+    }
 });
+
+uploadSchema.index({ userId: 1, name: 1 }, { unique: true });
 
 const Upload = model<IUpload>("Upload", uploadSchema);
 
