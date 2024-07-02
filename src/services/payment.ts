@@ -4,6 +4,8 @@ import { ObjectId } from "mongoose";
 import Stripe from "stripe";
 import StripeDetails from "../models/stripeDetails";
 import PaymentDetails from "../models/paymentDetails";
+import User from "../models/user";
+import Group from "../models/groups";
 
 class PaymentServices {
     async onPayment(sig: string | string[], body: any) {
@@ -38,6 +40,16 @@ class PaymentServices {
                 const validDate = new Date(Date.now() + (numberOfDays * 24 * 60 * 60 * 1000))
                 
                 const plan = session?.metadata.plan;
+                
+                const user = await User.findById(session?.metadata?.userId);
+
+                const group = await Group.findOne({name: plan});
+                if(!user || !group) {
+                    throw new AppError(500, "Error customer not found");
+                }
+
+                user.groupId = group._id;
+                await user.save()
 
                 const paymentDetails = await PaymentDetails.create({
                     userId: session?.metadata?.userId,
@@ -45,7 +57,6 @@ class PaymentServices {
                     validUntil: validDate,
                     paymentMode: "STRIPE"
                 });
-
                 await paymentDetails.save();
 
                 const stripeDetails = await StripeDetails.create({
@@ -53,7 +64,6 @@ class PaymentServices {
                     customerId: session?.customer,
                     subscriptionId: session?.subscription,
                 });
-
                 await stripeDetails.save();
 
                 break;
