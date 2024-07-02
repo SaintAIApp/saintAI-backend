@@ -16,11 +16,12 @@ class PaymentServices {
         } catch (err: any) {
             console.log(err.message);
             throw new AppError(500, "Error occured during payment") 
-        }
-        console.log(event)
+        }        
         // Handle the event
         switch (event.type) {
             case 'checkout.session.completed':
+                console.log('From server: checkout.session.completed');
+                
                 const session = await stripe.checkout.sessions.retrieve(
                     event.data.object.id,
                     {
@@ -57,10 +58,12 @@ class PaymentServices {
 
                 break;
             case "invoice.payment_succeeded": 
+            console.log("From server: invoice.payment_succeeded");
+            
                 const invoice = event.data.object as Stripe.Invoice;
 
                 const subscriptionDetails = invoice.subscription_details;
-                console.log(subscriptionDetails?.metadata);
+                console.log("From Inovice payment succeeded, subscriptionDetails metadata: "+subscriptionDetails?.metadata);
 
                 const newPaymentDetails = await PaymentDetails.findOne({userId: subscriptionDetails?.metadata?.userId}); 
 
@@ -71,9 +74,11 @@ class PaymentServices {
                 }
                 break;
             case "invoice.payment_failed":
+                console.log("invoice.payment_failed");
+                
                 const failedInvoice = event.data.object as Stripe.Invoice;
                 const failedSubscriptionDetails = failedInvoice.subscription_details;
-                console.log(failedSubscriptionDetails?.metadata);
+                console.log("From Inovice payment failed, subscriptionDetails metadata: "+failedSubscriptionDetails?.metadata);
 
                 const failedPaymentDetails = await PaymentDetails.findOne({userId: failedSubscriptionDetails?.metadata?.userId}); 
 
@@ -136,9 +141,6 @@ class PaymentServices {
 
             await stripe.subscriptions.cancel(stripeDetails.subscriptionId);
         }
-
-        paymentDetails.validUntil = new Date(Date.now());
-        await paymentDetails.save();
     }
 }
 
