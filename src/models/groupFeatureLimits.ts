@@ -2,7 +2,7 @@ import { Schema, model, ObjectId } from "mongoose";
 
 export interface IGroupFeatureLimit extends Document {
     groupId: ObjectId;
-    featureId: ObjectId;
+    featureId: string;
     value: any;
 }
 
@@ -13,8 +13,8 @@ const groupFeatureLimitSchema = new Schema<IGroupFeatureLimit>({
         required: true,
     },
     featureId: {
-        type: Schema.Types.ObjectId,
-        ref: "Feature",
+        type: "string",
+        unique: true,
         required: true,
     },
     value: {

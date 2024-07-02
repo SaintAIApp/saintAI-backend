@@ -2,7 +2,7 @@ import {Schema, ObjectId, model, Document} from "mongoose"
 
 interface IUserFeatureUsage extends Document {
     userId: ObjectId;
-    featureId: ObjectId;
+    featureId: String;
     usage: number;
 }
 
@@ -13,8 +13,8 @@ const userFeatureUsageSchema = new Schema<IUserFeatureUsage>({
         required: true,
     },
     featureId: {
-        type: Schema.Types.ObjectId,
-        ref: "Feature",
+        type: String,
+        unique: true,
         required: true,
     },
     usage: {
