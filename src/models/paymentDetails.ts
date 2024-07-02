@@ -21,6 +21,10 @@ const paymentDetailsSchema = new Schema<IPaymentDetails>({
         type: String,
         enum: ["STRIPE", "CRYPTO"],
         required: true,
+    },
+    plan:{
+        type: String,
+        required:true
     }
 });
 

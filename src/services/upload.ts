@@ -3,6 +3,7 @@ import { IUser } from "../models/user";
 import Uploads, { IUpload } from "../models/uploads";
 import { ObjectId } from "mongoose";
 import AppError from "../utils/AppError";
+import UserFeatureUsage from "../models/userFeatureUsage";
 
 class UploadService {
     async addFile(file: Express.Multer.File, user: IUser, name?: string): Promise<IUpload> {
@@ -37,7 +38,7 @@ class UploadService {
 
     async getAllFiles(userId: ObjectId): Promise<IUpload[]> {
         const uploads = await Uploads.find({userId: userId});
-
+        const userUploadUsage = await UserFeatureUsage.findOne({userId,featureId:"uploadDoc"});
         uploads.map(async (upload) => {
             upload.fileUrl = await getObjectURL(upload.fileKey);
         });

@@ -10,15 +10,19 @@ import CryptoDetails from "../models/cryptoDetails";
 import Group from "../models/groups";
 import Feature from "../models/features";
 import UserFeatureUsage from "../models/userFeatureUsage";
+import PaymentDetails from "../models/paymentDetails";
 
 
 class UserServices {
     async getDetails(userId:string){
-        const user = await User.findById(userId)?.select("username email isActive createdAt");;
-        if(!user)
-            throw new AppError(404,"User does not exists");
-        const subscriptionData =await  StripeDetails.find({userId})
-        return {userData:user,subscriptionData:subscriptionData}
+        const user = await User.findById(userId).select("username email isActive createdAt groupId");
+        const userGroup = await Group.findById(user?.groupId);
+        if (!user) {
+            throw new AppError(404, "User does not exist");
+        }        
+        const paymentData = await PaymentDetails.find({ userId });
+        return { userGroup, userData: user, subscriptionData:paymentData };
+        
     }
     async signup(username: string, email: string, password: string) : Promise<IUser | null>{
         const user = await User.findOne({

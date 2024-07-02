@@ -4,6 +4,8 @@ import { ObjectId } from "mongoose";
 import Stripe from "stripe";
 import StripeDetails from "../models/stripeDetails";
 import PaymentDetails from "../models/paymentDetails";
+import Group from "../models/groups";
+import User from "../models/user";
 
 class PaymentServices {
     async onPayment(sig: string | string[], body: any) {
@@ -35,12 +37,11 @@ class PaymentServices {
                 const numberOfDays = 30;
 
                 const validDate = new Date(Date.now() + (numberOfDays * 24 * 60 * 60 * 1000))
-                
                 const plan = session?.metadata.plan;
-
+                const userId = session?.metadata.userId;
                 const paymentDetails = await PaymentDetails.create({
                     userId: session?.metadata?.userId,
-                    plan: plan,
+                    plan,
                     validUntil: validDate,
                     paymentMode: "STRIPE"
                 });
@@ -48,10 +49,26 @@ class PaymentServices {
                 await paymentDetails.save();
 
                 const stripeDetails = await StripeDetails.create({
-                    userId: session?.metadata?.userId,
+                    userId,
                     customerId: session?.customer,
                     subscriptionId: session?.subscription,
                 });
+                const user = await User.findById(userId)
+                let group;
+                console.log("plan: "+plan  )
+                if(plan=="pro"){
+
+                     group = await Group.findOne({name:"Pro"})
+                }
+                else if(plan=="proPlus"){
+                    group = await Group.findOne({name:plan})
+                }
+                
+                if(user && group){
+                    user.groupId=group._id;
+                    await user.save();
+                }
+                
 
                 await stripeDetails.save();
 
@@ -122,10 +139,16 @@ class PaymentServices {
 
     async cancelSubscription(userId: ObjectId) {
         const paymentDetails = await PaymentDetails.findOne({userId: userId});
+        const user = await User.findById(userId)
+        const freeGroup = await Group.findOne({name:"Free"});
+
         console.log(userId)
         if(!paymentDetails) {
             throw new AppError(500, "User Payment Details does not exist");
         }
+        if(!user)
+            throw new AppError(500, "User Details does not exist");
+
 
         if(paymentDetails.paymentMode === "STRIPE") {
             const stripeDetails = await StripeDetails.findOne({userId: userId});
@@ -137,7 +160,9 @@ class PaymentServices {
             await stripe.subscriptions.cancel(stripeDetails.subscriptionId);
         }
 
-        paymentDetails.validUntil = new Date(Date.now());
+        paymentDetails.validUntil = new Date();
+        user.groupId=freeGroup?._id;
+        await user.save();
         await paymentDetails.save();
     }
 }
