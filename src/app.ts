@@ -38,86 +38,18 @@ process.on("uncaughtException", (err: any) => {
     process.exit(1);
 });
 
-// cron.schedule("0 1 * * * *", () => {
-// cron.schedule("0 0 14 * * *", async () => {
-
-//     await FinanceData.deleteMany({})
-
-//     const url = new URL(process.env.APLHAVANTAGE_URL as string);
-//     url.searchParams.append("apikey", process.env.APLHAVANTAGE_API_KEY as string);
-//     url.searchParams.append("interval", "60min");
-//     url.searchParams.append("function", "TIME_SERIES_INTRADAY");
-
-//     const symbols = ["AAPL", "MSFT", "GOOG", "AMZN", "META", "TSLA", "NVDA", "BRK.B", "JNJ", "V", "JPM", "005930.KS", "TSM", "WMT", "PG", "UNH", "ROG", "NVS", "HD"];
-//     //const symbols = ["AAPL"];
-//     try {
-        
-//         symbols.map(async (symbol) => {
-
-//             url.searchParams.append("symbol", symbol);
-
-//             const {data} = await axios.get(url.toString());
-
-//             url.searchParams.delete("symbol");
-
-//             if(!data["Meta Data"] || !data["Time Series (60min)"]) {
-//                 console.log("Stock Data: "+data);                
-//                 throw new AppError(500, "Error while requesting stock data");
-//             }
-
-//             await FinanceData.create({
-//                 symbol: data["Meta Data"]["2. Symbol"],
-//                 data: data["Time Series (60min)"],
-//                 type: "STOCK"
-//             });
-//         });
-//     } catch(err) {
-//         throw new AppError(500, "Error while requesting stock data")
-//     }
-
-//     url.searchParams.set("function", "CRYPTO_INTRADAY");
-//     url.searchParams.append("market", "USD");
-//     const cryptoSymbol = ["BTC", "ETH", "BNB", "ADA", "SOL", "XRP", "DOT", "DOGE", "USDC", "USDT", "SHIB", "LINK", "LTC", "BCH", "VET", "ETC", "THETA", "XLM", "FIL", "AVAX"];
-//     //const cryptoSymbol = ["BTC"];
-
-//     try {
-//         cryptoSymbol.map(async (symbol) => {
-
-//             url.searchParams.append("symbol", symbol);
-//             console.log(url.toString());
-
-//             const {data} = await axios.get(url.toString());
-
-//             url.searchParams.delete("symbol");
-
-//             if(!data["Meta Data"] || !data["Time Series Crypto (60min)"]) {            
-//                 console.log("Crypto Data: "+ data);
-//                 throw new AppError(500, "Error while requesting stock data");
-//             }
-
-//             await FinanceData.create({
-//                 symbol: data["Meta Data"]["2. Digital Currency Code"],
-//                 data: data["Time Series Crypto (60min)"],
-//                 type: "CRYPTO"
-//             });
-//         });
-//     } catch(err) {
-//         throw new AppError(500, "Error while requesting crypto data")
-//     }
-// })
-cron.schedule("0 47 15 * * *", async () => {
+cron.schedule("1 *  * * *", async () => {
     await FinanceData.deleteMany({});
 
-    //const symbols = ["AAPL", "MSFT", "GOOG", "AMZN", "META", "TSLA", "NVDA", "BRK.B", "JNJ", "V", "JPM", "005930.KS", "TSM", "WMT", "PG", "UNH", "ROG", "NVS", "HD"];
-    const symbols = ["AAPL", "MSFT", "GOOG", "AMZN", "META", "TSLA", "NVDA", "BRK.B"];
-
-    const cryptoSymbols = ["BTC", "ETH", "BNB", "ADA", "SOL", "XRP", "DOT", "DOGE", "USDC", "USDT", "SHIB", "LINK", "LTC", "BCH", "VET", "ETC", "THETA", "XLM", "FIL", "AVAX"];
+    const symbols = ["AAPL", "MSFT", "GOOG", "AMZN", "META", "TSLA", "NVDA", "JNJ", "V", "JPM", "TSM", "WMT", "PG", "UNH", "ROG", "NVS", "HD"];
+    const cryptoSymbols = ["BTC", "ETH", "ADA", "SOL", "XRP", "DOT", "DOGE", "USDT", "SHIB", "LINK", "LTC", "BCH", "VET", "ETC", "XLM", "FIL", "AVAX"];
 
     const fetchData = async (url: string) => {
         try {
             const { data } = await axios.get(url);
             return data;
         } catch (err) {
+            console.error(`Error while requesting data from ${url}:`, err);
             throw new AppError(500, "Error while requesting data");
         }
     };
@@ -135,28 +67,41 @@ cron.schedule("0 47 15 * * *", async () => {
             url.searchParams.append("market", "USD");
         }
 
-        const data = await fetchData(url.toString());
+        try {
+            const data = await fetchData(url.toString());
 
-        if (!data["Meta Data"] || !(type === "STOCK" ? data["Time Series (60min)"] : data["Time Series Crypto (60min)"])) {
-            throw new AppError(500, "Error while requesting data");
+            if (!data["Meta Data"] || !(type === "STOCK" ? data["Time Series (60min)"] : data["Time Series Crypto (60min)"])) {
+                console.error(`Invalid data received for ${symbol}:`, data);
+                throw new AppError(500, "Invalid data received");
+            }
+
+            await FinanceData.create({
+                symbol: type === "STOCK" ? data["Meta Data"]["2. Symbol"] : data["Meta Data"]["2. Digital Currency Code"],
+                data: type === "STOCK" ? data["Time Series (60min)"] : data["Time Series Crypto (60min)"],
+                type: type
+            });
+
+            console.log(`Successfully processed data for ${symbol} (${type})`);
+        } catch (err) {
+            console.error(`Error processing data for ${symbol} (${type}):`, err);
+            throw err;
         }
-
-        await FinanceData.create({
-            symbol: type === "STOCK" ? data["Meta Data"]["2. Symbol"] : data["Meta Data"]["2. Digital Currency Code"],
-            data: type === "STOCK" ? data["Time Series (60min)"] : data["Time Series Crypto (60min)"],
-            type: type
-        });
-        console.log("Finance Data created");
-        
     };
 
     try {
-        console.log("Processing stocks...");
         await Promise.all(symbols.map(symbol => processData(symbol, "STOCK")));
-        await Promise.all(cryptoSymbols.map(async (symbol) => await processData(symbol, "CRYPTO")));
+        console.log("Successfully processed all stock data");
     } catch (err) {
-        throw new AppError(500, "Error while processing data");
+        console.error("Error processing stock data:", err);
+    }
+
+    try {
+        await Promise.all(cryptoSymbols.map(symbol => processData(symbol, "CRYPTO")));
+        console.log("Successfully processed all crypto data");
+    } catch (err) {
+        console.error("Error processing crypto data:", err);
     }
 });
+
 
 export default app;
