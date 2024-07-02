@@ -39,7 +39,7 @@ class PaymentServices {
 
                 const validDate = new Date(Date.now() + (numberOfDays * 24 * 60 * 60 * 1000))
                 const plan = session?.metadata.plan;
-                
+                    console.log(plan)
                 const user = await User.findById(session?.metadata?.userId);
 
                 const group = await Group.findOne({name: plan});
@@ -59,25 +59,12 @@ class PaymentServices {
                 await paymentDetails.save();
 
                 const stripeDetails = await StripeDetails.create({
-                    userId,
+                    userId:user._id,
                     customerId: session?.customer,
                     subscriptionId: session?.subscription,
                 });
-                const user = await User.findById(userId)
-                let group;
-                console.log("plan: "+plan  )
-                if(plan=="pro"){
-
-                     group = await Group.findOne({name:"Pro"})
-                }
-                else if(plan=="proPlus"){
-                    group = await Group.findOne({name:plan})
-                }
-                
-                if(user && group){
-                    user.groupId=group._id;
-                    await user.save();
-                }
+          
+              
                 
 
                 await stripeDetails.save();
@@ -154,7 +141,7 @@ class PaymentServices {
     async cancelSubscription(userId: ObjectId) {
         const paymentDetails = await PaymentDetails.findOne({userId: userId});
         const user = await User.findById(userId)
-        const freeGroup = await Group.findOne({name:"Free"});
+        const freeGroup = await Group.findOne({name:"free"});
 
         console.log(userId)
         if(!paymentDetails) {

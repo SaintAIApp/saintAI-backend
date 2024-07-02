@@ -17,11 +17,13 @@ class UserServices {
     async getDetails(userId:string){
         const user = await User.findById(userId).select("username email isActive createdAt groupId");
         const userGroup = await Group.findById(user?.groupId);
+        const userFeatureUsage = await UserFeatureUsage.find({userId})
+
         if (!user) {
             throw new AppError(404, "User does not exist");
         }        
         const paymentData = await PaymentDetails.find({ userId });
-        return { userGroup, userData: user, subscriptionData:paymentData };
+        return { userGroup, userData: user, subscriptionData:paymentData,featureUsage:userFeatureUsage };
         
     }
     async signup(username: string, email: string, password: string) : Promise<IUser | null>{
@@ -37,7 +39,7 @@ class UserServices {
         const OTP = Math.floor(randomNumber)
         const opt_expire = 15 * 60 * 1000;
         const expireDate = new Date(Date.now() + opt_expire);
-        const group = await Group.findOne({name: "Free"});
+        const group = await Group.findOne({name: "free"});
 
         const newUser = await User.create({
             username: username,
@@ -85,7 +87,7 @@ class UserServices {
             const user = await User.findById(cryptoDetails.userId);
             return user;
         }
-        const group = await Group.findOne({name: "Free"});
+        const group = await Group.findOne({name: "free"});
 
         const newUser = await User.create({
             groupId: group?._id,
