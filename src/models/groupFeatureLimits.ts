@@ -14,7 +14,6 @@ const groupFeatureLimitSchema = new Schema<IGroupFeatureLimit>({
     },
     featureId: {
         type: "string",
-        unique: true,
         required: true,
     },
     value: {

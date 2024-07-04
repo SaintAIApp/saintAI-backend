@@ -23,6 +23,11 @@ export const incrementFeatureUsageCount = async (user: IUser, featureId: string)
 };
 
 export const isAllowed = async (user: IUser, featureId: string) => {
+
+    if(!featureId) {
+        throw new AppError(404, "Error featureID is not defined");
+    }
+
     const userFeatureUsage = await UserFeatureUsage.findOne({userId: user._id, featureId: featureId});
     console.log("userFeatureUsage: "+userFeatureUsage);
     if(!userFeatureUsage) {

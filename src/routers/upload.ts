@@ -7,7 +7,7 @@ import { isSubscribed } from "../middlewares/payment";
 
 const router = Router();
 
-router.post("/", isAuthenticated, isSubscribed, multerUpload.single("file"), isFeatureAllowed, addFile);
+router.post("/", isAuthenticated, isSubscribed, multerUpload.single("file"), addFile);
 router.get("/:uploadId", isAuthenticated, getFile);
 router.get("/", isAuthenticated, getAllFiles);
 router.put("/:uploadId", isAuthenticated, multerUpload.single("file"), uploadFile);
