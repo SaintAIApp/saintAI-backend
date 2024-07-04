@@ -29,7 +29,7 @@ const uploadSchema = new Schema<IUpload>({
         type: String,
         required: true,
     }
-});
+},{timestamps:true});
 
 uploadSchema.index({ userId: 1, name: 1 }, { unique: true });
 
