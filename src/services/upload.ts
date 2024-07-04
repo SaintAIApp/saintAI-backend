@@ -13,8 +13,8 @@ class UploadService {
             name = file.originalname;
         }
 
-        const imageName = await putObjectURL(file, name);
-        const fileUrl =  await getObjectURL("uploads/test");
+        const fileKey = await putObjectURL(file, name);
+        const fileUrl =  await getObjectURL(fileKey);
         
         let agentId;
         try {
@@ -42,7 +42,7 @@ class UploadService {
         const upload = await Uploads.create({
             userId: user._id,
             name: name,
-            fileKey: imageName,
+            fileKey: fileKey,
             agentId: agentId
         });
 

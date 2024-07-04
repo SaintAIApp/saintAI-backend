@@ -22,7 +22,7 @@ export const addFile = catchAsync(async (req: CustomRequest, res: Response, next
 
     const file = await UploadService.addFile(req.file, req.user, name);
     
-    await incrementFeatureUsageCount(req.user, req.body.featureId)
+    //await incrementFeatureUsageCount(req.user, req.body.featureId)
     
     return sendResponse(res, 201, file);
 });
