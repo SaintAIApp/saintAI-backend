@@ -34,9 +34,8 @@ class UploadService {
 
             agentId = response.data.agent_id;
         } catch (err: any) {
-            console.log(err);
-            
-            throw new AppError(404, err.message);
+            console.log(err.response.data);
+            throw new AppError(err.response.data.status, err.response.data.msg);
         }
 
         const upload = await Uploads.create({
