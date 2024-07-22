@@ -88,3 +88,23 @@ export const getChatHistory = catchAsync(async (req: Request, res: Response, nex
 
     return sendResponse(res, 200, chatHistory);
 });
+
+export const sendChatTrade = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const {user_msg,user_id} = req.body;
+    if(!user_msg || !user_id) {
+        return next(new AppError(400, "Please enter a message and userId"));
+    }
+    const assistantResponse = await UploadService.sendMessageTrade(user_msg,user_id);
+    return sendResponse(res, 200, assistantResponse);
+});
+
+export const getChatHistoryTrade = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const {user_id} = req.body;
+    if(!user_id) {
+        return next(new AppError(400, "Please enter the userId"));
+    }
+
+    const chatHistory = await UploadService.getChatHistoryTrade(user_id);
+
+    return sendResponse(res, 200, chatHistory);
+});

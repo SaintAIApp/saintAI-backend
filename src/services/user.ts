@@ -27,6 +27,7 @@ class UserServices {
         
     }
     async signup(username: string, email: string, password: string) : Promise<IUser | null>{
+
         const user = await User.findOne({
             $or: [{ username: username }, { email: email }],
         });
@@ -39,6 +40,7 @@ class UserServices {
         const OTP = Math.floor(randomNumber)
         const opt_expire = 15 * 60 * 1000;
         const expireDate = new Date(Date.now() + opt_expire);
+        
         const group = await Group.findOne({name: "free"});
 
         const newUser = await User.create({
