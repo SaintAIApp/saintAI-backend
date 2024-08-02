@@ -117,7 +117,7 @@ class PaymentServices {
               },
             ],
             success_url: `${process.env.CLIENT_URL}/payment/success`,
-            cancel_url: `${process.env.CLIENT_URL}/payment/failed`,
+            cancel_url: `${process.env.CLIENT_URL}/pricing`,
             metadata: {
                 userId: userId.toString(),
                 plan: plan
