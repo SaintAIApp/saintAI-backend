@@ -11,6 +11,8 @@ export async function startCronJobs() {
     } catch (error) {
       console.error("Error fetching stock data:", error);
     }
+  }, {
+    runOnInit: true,
   });
   schedule("*/2 * * * *", async () => {
     try {
@@ -18,6 +20,8 @@ export async function startCronJobs() {
     } catch (error) {
       console.error("Error fetching SOLANA price:", error);
     }
+  }, {
+    runOnInit: true,
   })
 };
 
