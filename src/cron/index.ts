@@ -7,7 +7,7 @@ import { schedule } from 'node-cron';
 export async function startCronJobs() {
   schedule("1 * * * *", async () => {
     try {
-      fetchStockData();
+      await fetchStockData();
     } catch (error) {
       console.error("Error fetching stock data:", error);
     }
@@ -16,7 +16,7 @@ export async function startCronJobs() {
   });
   schedule("*/2 * * * *", async () => {
     try {
-      fetchSolPrice();
+      await fetchSolPrice();
     } catch (error) {
       console.error("Error fetching SOLANA price:", error);
     }
