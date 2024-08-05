@@ -11,9 +11,11 @@ export async function startCronJobs() {
     } catch (error) {
       console.error("Error fetching stock data:", error);
     }
-  }, {
-    runOnInit: true,
-  });
+  },
+    {
+      runOnInit: true,
+    }
+  );
   schedule("*/2 * * * *", async () => {
     try {
       await fetchSolPrice();
@@ -22,7 +24,7 @@ export async function startCronJobs() {
     }
   }, {
     runOnInit: true,
-  })
+  });
 };
 
 async function fetchStockData() {
@@ -93,7 +95,11 @@ async function fetchStockData() {
 async function fetchSolPrice() {
   const url = "https://api.coingecko.com/api/v3/simple/price?ids=solana&vs_currencies=usd";
   try {
-    const { data } = await axios.get(url);
+    const { data } = await axios.get(url, {
+      headers: {
+        "Content-Type": "application/json"
+      },
+    });
     if (!data.solana || !data.solana.usd) {
       throw new AppError(500, "Unable to fetch SOL price at this moment");
     }
