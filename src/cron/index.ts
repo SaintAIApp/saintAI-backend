@@ -97,7 +97,9 @@ async function fetchSolPrice() {
   try {
     const { data } = await axios.get(url, {
       headers: {
-        "Content-Type": "application/json"
+        "Content-Type": "application/json",
+        // Required to bypass Cloudflare's anti-bot protection
+        "User-Agent": "Mozilla/5.0 (Linux; Linux x86_64) AppleWebKit/533.14 (KHTML, like Gecko) Chrome/49.0.1360.272 Safari/533"
       },
     });
     if (!data.solana || !data.solana.usd) {
