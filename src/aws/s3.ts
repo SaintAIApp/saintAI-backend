@@ -30,7 +30,7 @@ export const putObjectURL = async (file: Express.Multer.File, name: string) => {
       await s3Client.send(new PutObjectCommand(uploadParams));
       return destination;
     } catch (error: any) {
-      throw new AppError(500, "Error uploading image");
+      throw new AppError(400, error);
     }
 };
   

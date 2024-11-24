@@ -4,7 +4,7 @@ import { catchAsync, sendResponse } from "../utils/api.util"
 import AppError from "../utils/AppError";
 import UploadService from '../services/upload';
 import { incrementFeatureUsageCount } from "../utils/checkLimits";
-
+import MiningServices from '../services/mining'
 const allowedFileTypes = ['application/pdf', 'application/vnd.openxmlformats-officedocument.wordprocessingml.document', 'application/msword', 'text/csv'];
 
 
@@ -94,7 +94,14 @@ export const sendChatTrade = catchAsync(async (req: Request, res: Response, next
     if(!user_msg || !user_id) {
         return next(new AppError(400, "Please enter a message and userId"));
     }
+    const start = Date.now();
     const assistantResponse = await UploadService.sendMessageTrade(user_msg,user_id);
+
+    const end = Date.now();
+    const timeTaken = end - start; 
+
+    await MiningServices.createOrUpdate(user_id,user_msg,timeTaken,assistantResponse)
+    
     return sendResponse(res, 200, assistantResponse);
 });
 

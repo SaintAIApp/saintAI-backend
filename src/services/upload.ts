@@ -14,9 +14,10 @@ class UploadService {
         }
 
         const fileKey = await putObjectURL(file, name);
+        console.log(fileKey);
         const fileUrl =  await getObjectURL(fileKey);
-        
         let agentId;
+        console.log(agentId);
         try {
             const url = process.env.AI_SERVER_URL + "/create_agent"
             
