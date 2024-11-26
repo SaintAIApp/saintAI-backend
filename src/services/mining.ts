@@ -59,7 +59,7 @@ class MiningServices {
                 
                 while (tradeLog.clock >= 60) {
                     tradeLog.coin_stt += 1.25;
-                    max_mining_duration -= 1 ;
+                    tradeLog.max_mining_duration -= 1 ;
                     tradeLog.mining_duration += 1;
                     tradeLog.total_mining_duration += 1;
                     tradeLog.clock -= 60;
