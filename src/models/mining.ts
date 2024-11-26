@@ -1,17 +1,21 @@
 import mongoose from 'mongoose';
 
 const chatSchema = new mongoose.Schema({
-    timeTaken: { type: Number, required: true }, // waktu eksekusi dalam milidetik
+    timeTaken: { type: Number, required: true },
     question: { type: String, required: true },
     answer: { type: String, required: true },
-    created_at: { type: Date, default: Date.now } // waktu pembuatan chat
+    created_at: { type: Date, default: Date.now }
 });
 
 const miningSchema = new mongoose.Schema({
     user_id: { type: String, required: true },
-    clock: { type: Number, required: true },  // misalnya untuk menyimpan waktu yang berkaitan
+    clock: { type: Number, required: true },  
+    mining_duration: { type: Number, required: true },
+    max_mining_duration: { type: Number, required:true},
     coin_stt: { type: Number, required: true },
-    chats: [chatSchema],  // array objek chat
+    total_mining_duration: { type: Number, required: true },
+    chats: [chatSchema],  
+    last_mining_date: { type: Date }, 
     created_at: { type: Date, default: Date.now }
 });
 
