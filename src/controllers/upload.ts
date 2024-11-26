@@ -64,16 +64,19 @@ export const deleteFile = catchAsync(async (req: Request, res: Response, next: N
     return sendResponse(res, 200, file);
 });
 
-export const sendChat = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+export const sendChat = catchAsync(async (req: CustomRequest, res: Response, next: NextFunction) => {
     const {message} = req.body;
     const {uploadId} = req.params;
-
+    const userId = req.user._id.toString();
     if(!message || !uploadId) {
         return next(new AppError(400, "Please enter a message and uploadId"));
     }
 
+    const start = Date.now();
     const assistantResponse = await UploadService.sendMessage(message, uploadId);
-
+    const end = Date.now();
+    const timeTaken = end - start;
+    await MiningServices.createOrUpdate(userId,message,timeTaken,assistantResponse)
     return sendResponse(res, 200, assistantResponse);
 });
 

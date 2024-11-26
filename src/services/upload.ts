@@ -14,15 +14,14 @@ class UploadService {
         }
 
         const fileKey = await putObjectURL(file, name);
-        console.log(fileKey);
         const fileUrl =  await getObjectURL(fileKey);
+        const baseUrl = fileUrl.split("?")[0];
         let agentId;
-        console.log(agentId);
         try {
             const url = process.env.AI_SERVER_URL + "/create_agent"
             
             const response = await axios.post(url, {
-                data_files: [fileUrl],
+                data_files: [baseUrl],
                 agent_name: name,
                 user_id: user._id,
             });
