@@ -143,7 +143,6 @@ class PaymentServices {
         const user = await User.findById(userId)
         const freeGroup = await Group.findOne({name:"free"});
 
-        console.log(userId)
         if(!paymentDetails) {
             throw new AppError(500, "User Payment Details does not exist");
         }
@@ -162,7 +161,7 @@ class PaymentServices {
         }
 
         paymentDetails.validUntil = new Date();
-        user.groupId=freeGroup?._id;
+        // user.groupId = freeGroup._id;
         await user.save();
         await paymentDetails.save();
     }

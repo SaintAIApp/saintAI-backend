@@ -1,6 +1,7 @@
 import { Schema, model, ObjectId, Document } from "mongoose";
 
 export interface IGroup extends Document {
+    _id:ObjectId;
     name: string;
     price: number;
 }
