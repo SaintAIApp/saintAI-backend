@@ -25,6 +25,7 @@ class MiningServices {
             created_at: new Date()
         };
         let totalMiningDuration = await this.getTotalMiningDuration()
+        let totalMiningDurationInHours = totalMiningDuration / 60;
         let tradeLog = await Minings.findOne({ user_id });
         let plan = await PaymentDetails.findOne({ userId:user_id });
         let max_mining_duration: number;
@@ -43,41 +44,43 @@ class MiningServices {
         const todayDate = today.toISOString().split('T')[0]; 
 
         if (tradeLog) {
-            
+            console.log(tradeLog?.last_mining_date?.toISOString().split('T')[0],todayDate)
             if (tradeLog?.last_mining_date?.toISOString().split('T')[0] !== todayDate) {
-                tradeLog.mining_duration = 0;
-                tradeLog.last_mining_date = today;
+                tradeLog.max_mining_duration = max_mining_duration;
+                tradeLog.last_mining_date = today; 
             }
-            if(totalMiningDuration >= 1000) {
+            if (tradeLog.max_mining_duration <= 0) {
+                console.log("Mining limit reached for today. Please try again tomorrow.");
+                return; // Prevent further mining if max mining duration is 0
+            }
+            console.log(totalMiningDurationInHours)
+            if(totalMiningDurationInHours === 1000) {
+                tradeLog.total_mining_duration += 1;
                 tradeLog.coin_stt += 100;
             }
             
-            if (tradeLog.mining_duration + timeTakenInMinutes <= max_mining_duration) {
-                tradeLog.clock += timeTakenInSeconds;  
-                tradeLog.clock = parseFloat(tradeLog.clock.toFixed(2)); 
-                
-                
-                while (tradeLog.clock >= 60) {
-                    tradeLog.coin_stt += 1.25;
-                    tradeLog.max_mining_duration -= 1 ;
-                    tradeLog.mining_duration += 1;
-                    tradeLog.total_mining_duration += 1;
-                    tradeLog.clock -= 60;
-                }
-                tradeLog.chats.push(newChat);
-            } else {
-                console.log("Mining limit reached for today");
+            
+            tradeLog.clock += timeTakenInSeconds;
+            tradeLog.clock = parseFloat(tradeLog.clock.toFixed(2));
+
+            while (tradeLog.clock >= 60) {
+                tradeLog.coin_stt += 1.25;
+                tradeLog.max_mining_duration -= 1;
+                tradeLog.total_mining_duration += 1;
+                tradeLog.clock -= 60;
             }
+            tradeLog.chats.push(newChat); // Add the new chat to the logs
+        
         } else {
             const clock = 0 + timeTakenInSeconds;
             tradeLog = await Minings.create({
                 user_id,
                 clock: parseFloat(clock.toFixed(2)),  
                 coin_stt: 0,
-                mining_duration: 0,
+                mining_duration: max_mining_duration,
                 total_mining_duration:0,
                 max_mining_duration:max_mining_duration,
-                last_mining_date: todayDate,
+                last_mining_date: null,
                 chats: [newChat]
             });
             
@@ -105,7 +108,7 @@ class MiningServices {
         if (!tradeLog) {
             tradeLog = {
                 clock: 0,
-                mining_duration: 0,
+                mining_duration: max_mining_duration,
                 max_mining_duration:max_mining_duration,
                 total_mining_duration:0,
                 coin_stt: 0,
@@ -121,7 +124,7 @@ class MiningServices {
             {
                 $group: {
                     _id: null,
-                    totalMiningDuration: { $sum: "$mining_duration" }
+                    totalMiningDuration: { $sum: "$total_mining_duration" }
                 }
             }
         ]);
