@@ -2,8 +2,8 @@ import { Router } from "express";
 import { isAuthenticated } from "../middlewares/auth";
 import { addFile, deleteFile, getAllFiles, getChatHistory, getChatHistoryTrade, getFile, sendChat, sendChatTrade, uploadFile } from "../controllers/upload";
 import { multerUpload } from "../config/multerUpload";
-import { isFeatureAllowed } from "../middlewares/featureLimit";
-import { isSubscribed } from "../middlewares/payment";
+// import { isFeatureAllowed } from "../middlewares/featureLimit";
+// import { isSubscribed } from "../middlewares/payment";
 
 const router = Router();
 

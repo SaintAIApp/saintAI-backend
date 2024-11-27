@@ -3,10 +3,10 @@
   "version": "1.0.0",
   "description": "Backend for the S.AI.N.T application",
   "main": "src/index.js",
-  "scripts": {
+ "scripts": {
     "start": "npm run build && set NODE_ENV=production && node build/src/index.js",
     "dev": "npx nodemon",
-    "build": "rimraf ./build && npx tsc"
+    "build": "rimraf ./build && node --max-old-space-size=4096 ./node_modules/.bin/tsc"
   },
   "author": "",
   "license": "ISC",

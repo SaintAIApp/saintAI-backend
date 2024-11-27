@@ -2,7 +2,6 @@ import { IUser } from "../models/user";
 import UserFeatureUsage from "../models/userFeatureUsage";
 import GroupFeatureLimit from "../models/groupFeatureLimits";
 import AppError from "./AppError";
-import mongoose from "mongoose";
 
 export const incrementFeatureUsageCount = async (user: IUser, featureId: string) => {
     //console.log("FeatureId:", featureId);

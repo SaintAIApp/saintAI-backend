@@ -141,7 +141,7 @@ class PaymentServices {
     async cancelSubscription(userId: ObjectId) {
         const paymentDetails = await PaymentDetails.findOne({userId: userId});
         const user = await User.findById(userId)
-        const freeGroup = await Group.findOne({name:"free"});
+        await Group.findOne({name:"free"});
 
         if(!paymentDetails) {
             throw new AppError(500, "User Payment Details does not exist");

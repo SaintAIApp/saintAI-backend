@@ -1,4 +1,4 @@
-import express, { Router } from "express";
+import  { Router } from "express";
 import { crypto, news, stocks, getSolPrice } from "../controllers/finance";
 
 const router = Router();

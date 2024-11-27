@@ -64,7 +64,7 @@ class UploadService {
 
     async getAllFiles(userId: ObjectId): Promise<IUpload[]> {
         const uploads = await Uploads.find({userId: userId});
-        const userUploadUsage = await UserFeatureUsage.findOne({userId,featureId:"uploadDoc"});
+        await UserFeatureUsage.findOne({userId,featureId:"uploadDoc"});
         uploads.map(async (upload) => {
             upload.fileUrl = await getObjectURL(upload.fileKey);
         });

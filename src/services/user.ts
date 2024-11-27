@@ -3,12 +3,8 @@ import User, { IUser } from "../models/user";
 import AppError from "../utils/AppError";
 import { sendmail } from "../utils/sendMail";
 import { ObjectId } from "mongoose";
-
-import StripeDetails from "../models/stripeDetails";
-
 import CryptoDetails from "../models/cryptoDetails";
 import Group from "../models/groups";
-import Feature from "../models/features";
 import UserFeatureUsage from "../models/userFeatureUsage";
 import PaymentDetails from "../models/paymentDetails";
 

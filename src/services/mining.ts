@@ -38,7 +38,6 @@ class MiningServices {
             max_mining_duration = 2 * 60; // minutes
         }
         const timeTakenInSeconds = timeTaken / 1000;
-        const timeTakenInMinutes = timeTakenInSeconds / 60;
 
         const today = new Date();
         const todayDate = today.toISOString().split('T')[0]; 

@@ -1,4 +1,4 @@
-import { Request, Response, NextFunction, CookieOptions } from "express";
+import { Request, Response, NextFunction } from "express";
 import { IUser } from "../models/user";
 
 // Purpose: Express middleware to catch async errors.
