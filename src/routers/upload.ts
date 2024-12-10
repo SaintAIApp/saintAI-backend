@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { isAuthenticated } from "../middlewares/auth";
-import { addFile, deleteFile, getAllFiles, getChatHistory, getChatHistoryTrade, getFile, sendChat, sendChatTrade, uploadFile } from "../controllers/upload";
+import { addFile, deleteFile, getAllFiles, getChatHistory, getChatHistoryTrade, getFile, sendChat, sendChatTrade, summarizeArticle, uploadFile } from "../controllers/upload";
 import { multerUpload } from "../config/multerUpload";
 // import { isFeatureAllowed } from "../middlewares/featureLimit";
 // import { isSubscribed } from "../middlewares/payment";
@@ -14,6 +14,7 @@ router.put("/:uploadId", isAuthenticated, multerUpload.single("file"), uploadFil
 router.delete("/:uploadId", isAuthenticated, deleteFile);
 
 router.post("/send-message/:uploadId", isAuthenticated, sendChat);
+router.post("/summarize-article", isAuthenticated, summarizeArticle);
 router.get("/get-chat-history/:uploadId", isAuthenticated, getChatHistory);
 
 router.post("/get_chat_history_trade_data", isAuthenticated, getChatHistoryTrade);

@@ -79,6 +79,20 @@ export const sendChat = catchAsync(async (req: CustomRequest, res: Response, nex
     await MiningServices.createOrUpdate(userId,message,timeTaken,assistantResponse)
     return sendResponse(res, 200, assistantResponse);
 });
+export const summarizeArticle = catchAsync(async (req: CustomRequest, res: Response, next: NextFunction) => {
+    const {url} = req.body;
+    const userId = req.user._id.toString();
+    if(!url ) {
+        return next(new AppError(400, "Please enter a url"));
+    }
+
+    const start = Date.now();
+    const assistantResponse = await UploadService.summarizeArticle(url);
+    const end = Date.now();
+    const timeTaken = end - start;
+    await MiningServices.createOrUpdate(userId,url,timeTaken,assistantResponse)
+    return sendResponse(res, 200, assistantResponse);
+});
 
 export const getChatHistory = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const {uploadId} = req.params;
