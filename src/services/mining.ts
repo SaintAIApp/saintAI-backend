@@ -67,6 +67,7 @@ class MiningServices {
                 tradeLog.max_mining_duration -= 1;
                 tradeLog.total_mining_duration += 1;
                 tradeLog.clock -= 60;
+                tradeLog.last_mining_date = today;
             }
             tradeLog.chats.push(newChat); // Add the new chat to the logs
         
@@ -76,7 +77,6 @@ class MiningServices {
                 user_id,
                 clock: parseFloat(clock.toFixed(2)),  
                 coin_stt: 0,
-                mining_duration: max_mining_duration,
                 total_mining_duration:0,
                 max_mining_duration:max_mining_duration,
                 last_mining_date: null,
@@ -108,12 +108,24 @@ class MiningServices {
             tradeLog = {
                 clock: 0,
                 mining_duration: max_mining_duration,
-                max_mining_duration:max_mining_duration,
-                total_mining_duration:0,
+                max_mining_duration: max_mining_duration,
+                total_mining_duration: 0,
                 coin_stt: 0,
-                last_mining_date: null,
+                last_mining_date: new Date(),
                 created_at: new Date()
             } as Mining;
+        } else {
+            const today = new Date();
+            const lastMiningDate = tradeLog.last_mining_date ? new Date(tradeLog.last_mining_date) : null;
+            const todayDate = today.toISOString().split('T')[0];
+            const lastMiningDateString = lastMiningDate ? lastMiningDate.toISOString().split('T')[0] : null;
+    
+            if (todayDate !== lastMiningDateString) {
+                tradeLog.max_mining_duration = max_mining_duration;
+                tradeLog.last_mining_date = today;
+                
+                await Minings.updateOne({ user_id }, { $set: tradeLog });
+            }
         }
 
         return tradeLog;

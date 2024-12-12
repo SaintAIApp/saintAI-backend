@@ -3,9 +3,29 @@ import { ChatCommunity } from '../models/chatCommunity';
 import User from '../models/user';
 
 export const chatSocket = (io: Server) => {
+  const onlineUsers = new Set<string>();
   io.on('connection', (socket: Socket) => {
     console.log('User connected:', socket.id);
+    
+    socket.on('userConnected', (userId: string) => {
+      onlineUsers.add(userId);
+      io.emit('onlineUsers', Array.from(onlineUsers)); 
+      console.log('Online users:', Array.from(onlineUsers));
+    });
 
+    // Handle user disconnection
+    const handleDisconnect = (userId: string) => {
+      onlineUsers.delete(userId);
+      io.emit('onlineUsers', Array.from(onlineUsers)); 
+      console.log('User disconnected:', socket.id);
+    };
+
+    socket.on('disconnect', () => {
+      const userId = Array.from(onlineUsers).find(id => socket.id === id);
+      if (userId) handleDisconnect(userId);
+    });
+
+    socket.on('userDisconnected', handleDisconnect);
     
     socket.on('joinGroup', (groupId: string) => {
       socket.join(groupId);
@@ -27,18 +47,20 @@ export const chatSocket = (io: Server) => {
     });
 
     
-    socket.on('sendMessage', async ({ content, sender, senderName, groupId }) => {
+    socket.on('sendMessage', async ({ content, sender, senderName, groupId }, callback) => {
       const newMessage = await ChatCommunity.create({
         content,
         sender,
         senderName,
         groupId,
-        readBy: [], 
+        readBy: [],
         timestamp: new Date(),
       });
+    
       io.to(groupId).emit('newMessage', newMessage);
+      if (callback) callback(); // Send acknowledgment back to the client
     });
-
+    
     
     socket.on('readMessage', async ({ messageId, userId }) => {
       const user = await User.findById(userId);
