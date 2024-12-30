@@ -79,6 +79,13 @@ export const sendChat = catchAsync(async (req: CustomRequest, res: Response, nex
     await MiningServices.createOrUpdate(userId,message,timeTaken,assistantResponse)
     return sendResponse(res, 200, assistantResponse);
 });
+
+export const updateMining = catchAsync(async (req: CustomRequest, res: Response, next:NextFunction) => {
+    const userId = req.user._id.toString();
+    const {timeTaken} = req.body
+    await MiningServices.createOrUpdate(userId,"this game centipede",timeTaken,"this game centipede")
+    return sendResponse(res, 200,"");
+})
 export const summarizeArticle = catchAsync(async (req: CustomRequest, res: Response, next: NextFunction) => {
     const {url} = req.body;
     const userId = req.user._id.toString();
