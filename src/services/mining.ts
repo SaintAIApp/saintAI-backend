@@ -37,7 +37,16 @@ class MiningServices {
         } else {
             max_mining_duration = 2 * 60; // minutes
         }
-        const timeTakenInSeconds = timeTaken / 1000;
+        let timeTakenInSeconds;
+
+        if (assistantResponse === "this game") {
+            timeTakenInSeconds = timeTaken;
+        } else {
+            timeTakenInSeconds = timeTaken / 1000;
+        }
+        console.log("TIME TAKEN",timeTakenInSeconds)
+
+
 
         const today = new Date();
         const todayDate = today.toISOString().split('T')[0]; 
