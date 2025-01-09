@@ -11,94 +11,135 @@ interface Mining extends Document {
     created_at: Date;
 }
 
+interface IChat {
+    timeTaken: number;
+    question: string;
+    answer: string;
+    created_at: Date;
+}
+
 class MiningServices {
+    private readonly MINING_DURATIONS = {
+        pro: 4 * 60,
+        proPlus: 24 * 60,
+        default: 2 * 60
+    };
+
+    private readonly COIN_REWARD = 1.25;
+    private readonly MINING_INTERVAL = 60; // 1 minute in seconds
+    private readonly SPECIAL_MINING_HOURS = 1000;
+    private readonly SPECIAL_MINING_REWARD = 100;
+
     async createOrUpdate(
         user_id: string,
         userMsg: string,
         timeTaken: number,
         assistantResponse: string
     ): Promise<void> {
-        const newChat = {
+        try {
+            const timeTakenInSeconds = this.calculateTimeTaken(timeTaken, assistantResponse);
+            const newChat = this.createChatObject(userMsg, timeTaken, assistantResponse);
+            
+            const plan = await PaymentDetails.findOne({ userId: user_id });
+            const max_mining_duration = this.getMiningDuration(plan?.plan);
+
+            let tradeLog = await Minings.findOne({ user_id });
+            const today = new Date();
+
+            if (!tradeLog) {
+                tradeLog = await this.createNewTradeLog(user_id, timeTakenInSeconds, max_mining_duration, newChat);
+                await this.processClockAndRewards(tradeLog, today);
+                await tradeLog.save();
+                return;
+            }
+
+            await this.updateExistingTradeLog(tradeLog, today, max_mining_duration, timeTakenInSeconds, newChat);
+        } catch (error) {
+            console.error('Error in createOrUpdate:', error);
+            throw error;
+        }
+    }
+
+    private calculateTimeTaken(timeTaken: number, assistantResponse: string): number {
+        return assistantResponse === "this game" ? timeTaken : timeTaken / 1000;
+    }
+
+    private createChatObject(userMsg: string, timeTaken: number, assistantResponse: string): IChat {
+        return {
             timeTaken,
             question: userMsg,
             answer: assistantResponse,
             created_at: new Date()
         };
-        let totalMiningDuration = await this.getTotalMiningDuration()
-        let totalMiningDurationInHours = totalMiningDuration / 60;
-        let tradeLog = await Minings.findOne({ user_id });
-        let plan = await PaymentDetails.findOne({ userId:user_id });
-        let max_mining_duration: number;
+    }
 
-        if (plan?.plan === "pro") {
-            max_mining_duration = 4 * 60; // minutes
-        } else if (plan?.plan === "proPlus") {
-            max_mining_duration = 24 * 60; // minutes
-        } else {
-            max_mining_duration = 2 * 60; // minutes
+    private getMiningDuration(plan?: string): number {
+        return this.MINING_DURATIONS[plan as keyof typeof this.MINING_DURATIONS] || this.MINING_DURATIONS.default;
+    }
+
+    private async createNewTradeLog(
+        user_id: string,
+        timeTakenInSeconds: number,
+        max_mining_duration: number,
+        newChat: IChat
+    ) {
+        return await Minings.create({
+            user_id,
+            clock: parseFloat(timeTakenInSeconds.toFixed(2)),
+            coin_stt: 0,
+            total_mining_duration: 0,
+            max_mining_duration,
+            last_mining_date: null,
+            chats: [newChat]
+        });
+    }
+
+    private async updateExistingTradeLog(
+        tradeLog: any,
+        today: Date,
+        max_mining_duration: number,
+        timeTakenInSeconds: number,
+        newChat: IChat
+    ): Promise<void> {
+        const todayDate = today.toISOString().split('T')[0];
+        const lastMiningDate = tradeLog.last_mining_date?.toISOString().split('T')[0];
+
+        if (lastMiningDate !== todayDate) {
+            tradeLog.max_mining_duration = max_mining_duration;
+            tradeLog.last_mining_date = today;
         }
-        let timeTakenInSeconds;
 
-        if (assistantResponse === "this game") {
-            timeTakenInSeconds = timeTaken;
-        } else {
-            timeTakenInSeconds = timeTaken / 1000;
+        if (tradeLog.max_mining_duration <= 0) {
+            return; // Mining limit reached
         }
-        console.log("TIME TAKEN",timeTakenInSeconds)
 
+        await this.processSpecialMiningReward(tradeLog);
 
+        tradeLog.clock = parseFloat((tradeLog.clock + timeTakenInSeconds).toFixed(2));
+        tradeLog.chats.push(newChat);
 
-        const today = new Date();
-        const todayDate = today.toISOString().split('T')[0]; 
-
-        if (tradeLog) {
-            console.log(tradeLog?.last_mining_date?.toISOString().split('T')[0],todayDate)
-            if (tradeLog?.last_mining_date?.toISOString().split('T')[0] !== todayDate) {
-                tradeLog.max_mining_duration = max_mining_duration;
-                tradeLog.last_mining_date = today; 
-            }
-            if (tradeLog.max_mining_duration <= 0) {
-                console.log("Mining limit reached for today. Please try again tomorrow.");
-                return; // Prevent further mining if max mining duration is 0
-            }
-            console.log(totalMiningDurationInHours)
-            if(totalMiningDurationInHours === 1000) {
-                tradeLog.total_mining_duration += 1;
-                tradeLog.coin_stt += 100;
-            }
-            
-            
-            tradeLog.clock += timeTakenInSeconds;
-            tradeLog.clock = parseFloat(tradeLog.clock.toFixed(2));
-
-            while (tradeLog.clock >= 60) {
-                tradeLog.coin_stt += 1.25;
-                tradeLog.max_mining_duration -= 1;
-                tradeLog.total_mining_duration += 1;
-                tradeLog.clock -= 60;
-                tradeLog.last_mining_date = today;
-            }
-            tradeLog.chats.push(newChat); // Add the new chat to the logs
-        
-        } else {
-            const clock = 0 + timeTakenInSeconds;
-            tradeLog = await Minings.create({
-                user_id,
-                clock: parseFloat(clock.toFixed(2)),  
-                coin_stt: 0,
-                total_mining_duration:0,
-                max_mining_duration:max_mining_duration,
-                last_mining_date: null,
-                chats: [newChat]
-            });
-            
-            if (tradeLog.clock >= 60) {
-                tradeLog.coin_stt += 1.25;
-                tradeLog.clock -= 60;
-            }
-        }
-        
+        await this.processClockAndRewards(tradeLog, today);
         await tradeLog.save();
+    }
+
+    private async processSpecialMiningReward(tradeLog: any): Promise<void> {
+        const totalMiningDuration = await this.getTotalMiningDuration();
+        const totalMiningDurationInHours = totalMiningDuration / 60;
+
+        if (totalMiningDurationInHours === this.SPECIAL_MINING_HOURS) {
+            tradeLog.total_mining_duration += 1;
+            tradeLog.coin_stt += this.SPECIAL_MINING_REWARD;
+        }
+    }
+
+    private async processClockAndRewards(tradeLog: any, today: Date): Promise<void> {
+        while (tradeLog.clock >= this.MINING_INTERVAL) {
+            tradeLog.coin_stt += this.COIN_REWARD;
+            tradeLog.max_mining_duration -= 1;
+            tradeLog.total_mining_duration += 1;
+            tradeLog.clock -= this.MINING_INTERVAL;
+            tradeLog.last_mining_date = today;
+        }
     }
 
     async getMining(user_id: string) {
