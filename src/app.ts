@@ -6,6 +6,7 @@ import financeRouter from './routers/finance';
 import paymentRouter from "./routers/payment";
 import uploadRouter from './routers/upload';
 import userRouter from "./routers/user";
+import planRouter from "./routers/plan";
 const app = express();
 
 app.use(cors());
@@ -18,6 +19,7 @@ app.use("/api/v1/user", userRouter);
 app.use("/api/v1/payment", paymentRouter)
 app.use("/api/v1/upload", uploadRouter)
 app.use("/api/v1/finance", financeRouter)
+app.use("/api/v1/plans", planRouter)
 
 // Unhandled Routes:
 app.all("*", (req, res, next) => {
