@@ -22,15 +22,15 @@ export const onPayment = catchAsync(async (req: Request, res: Response, next: Ne
 
 export const createCheckout = catchAsync(async (req: CustomRequest, res: Response, next: NextFunction) => {
     const {plan} = req.body;
-
-    if(!plan && !["pro", "proPlus"].includes(plan)) {
-        return next(new AppError(400, "Invalid subscription type"));
-    }
+    console.log(plan)
+    // if(!plan && !["pro", "proPlus"].includes(plan)) {
+    //     return next(new AppError(400, "Invalid subscription type"));
+    // }
 
     const user = await StripeDetails.findById(req.user._id);
-
+    console.log(user)
     const url = await PaymentServices.createCheckout(plan, req.user._id, user?.customerId);
-
+    console.log(url)
     if(!url) {
         return next(new AppError(500, "Error while creating session"));
     }

@@ -6,6 +6,7 @@ import StripeDetails from "../models/stripeDetails";
 import PaymentDetails from "../models/paymentDetails";
 import User from "../models/user";
 import Group from "../models/groups";
+import Plans from "../models/plans";
 
 class PaymentServices {
     async onPayment(sig: string | string[], body: any) {
@@ -38,16 +39,15 @@ class PaymentServices {
                 const numberOfDays = 30;
 
                 const validDate = new Date(Date.now() + (numberOfDays * 24 * 60 * 60 * 1000))
-                const plan = session?.metadata.plan;
-                    console.log(plan)
+                const planName = session?.metadata.plan;
                 const user = await User.findById(session?.metadata?.userId);
 
-                const group = await Group.findOne({name: plan});
-                if(!user || !group) {
+                const plan = await Plans.findOne({name: planName});
+                if(!user || !plan) {
                     throw new AppError(500, "Error customer not found");
                 }
 
-                user.groupId = group._id;
+                user.planId = plan._id;
                 await user.save()
 
                 const paymentDetails = await PaymentDetails.create({

@@ -189,6 +189,25 @@ class UploadService {
         }
         return assistantResponse;
     }
+    async sendGenerateGame(message: string, userId: string) {
+        const url = process.env.AI_SERVER_URL + "/generate-game";
+        let assistantResponse;
+        try {
+            const response = await axios.post(url, {
+                user_msg: message,
+                user_id: userId
+            });
+            console.log(response)
+            if(response.status !== 200) {
+                throw new AppError(500, "Error while fetching response");
+            }
+
+            assistantResponse = response.data.assistant_response
+        } catch(err: any) {
+            throw new AppError(500, err.response.data.msg);
+        }
+        return assistantResponse;
+    }
     async summarizeArticle(message: string) {
         const url = process.env.AI_SERVER_URL + "/summarize_article";
         let assistantResponse;

@@ -1,0 +1,89 @@
+
+    [
+      {
+        "tier": 1,
+        "name": "Genesis",
+        "codename": "The Beginning",
+        "price": 0.00,
+        "priceCurrency": "STT",
+        "upgradeBurnNote": null,
+        "properties": [
+          "SaintAI Agent Access",
+          "Limited AI Mine Time",
+          "Maximum 2 Mine hrs./day",
+          "Unlimited Generative AI",
+          "Unlimited Agentic AI",
+          "Access to AI Mining Pools",
+          "Access to Power Streak mining bonus of 1000 $STT - Every thousand hours of Collective mine time"
+        ]
+      },
+      {
+        "tier": 2,
+        "name": "Oneiros",
+        "codename": "The Dreamer",
+        "price": 2281,
+        "priceCurrency": "STT",
+        "upgradeBurnNote": "50% Of Upgrade Fee Burned",
+        "properties": [
+          "SaintAI Agent Access",
+          "Limited AI Mine Time",
+          "Maximum 4 Mine hrs./day",
+          "Unlimited Generative AI",
+          "Unlimited Agentic AI",
+          "Access to AI Mining Pools",
+          "Access to Power Streak mining bonus of 1000 $STT - Every thousand hours of Collective mine time"
+        ]
+      },
+      {
+        "tier": 3,
+        "name": "Medius",
+        "codename": "The Middle Ground",
+        "price": 9125,
+        "priceCurrency": "STT",
+        "upgradeBurnNote": "50% Of Upgrade Fee Burned",
+        "properties": [
+          "SaintAI Agent Access",
+          "Limited AI Mine Time",
+          "Maximum 8 Mine hrs./day",
+          "Unlimited Generative AI",
+          "Unlimited Agentic AI",
+          "Access to AI Mining Pools",
+          "Access to Power Streak mining bonus of 1000 $STT - Every thousand hours of Collective mine time"
+        ]
+      },
+      {
+        "tier": "Tier 4",
+        "name": "Kratos",
+        "codename": "The Power",
+        "price": 36496,
+        "priceCurrency": "STT",
+        "upgradeBurnNote": "50% Of Upgrade Fee Burned",
+        "properties": [
+          "SaintAI Agent Access",
+          "Limited AI Mine Time",
+          "Maximum 16 Mine hrs./day",
+          "Unlimited Generative AI",
+          "Unlimited Agentic AI",
+          "Access to AI Mining Pools",
+          "Access to Power Streak mining bonus of 1000 $STT - Every thousand hours of Collective mine time"
+        ]
+      },
+      {
+        "tier": "Tier 5",
+        "name": "Odysseus",
+        "codename": "The King",
+        "price": 145984,
+        "priceCurrency": "STT",
+        "upgradeBurnNote": "50% Of Upgrade Fee Burned",
+        "properties": [
+          "SaintAI Agent Access",
+          "Unlimited Mine Time",
+          "Set and Forget, 24 hr. Automated AI Mining",
+          "Unlimited Generative AI",
+          "Unlimited Agentic AI",
+          "Access to AI Mining Pools",
+          "Access to Power Streak mining bonus of 1000 $STT - Every thousand hours of Collective mine time"
+        ]
+      }
+    ]
+  
