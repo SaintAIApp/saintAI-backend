@@ -16,3 +16,7 @@ export const getTotalMining = catchAsync(async (req: Request, res: Response, nex
     const miningDetail = await MiningService.getTotalMiningDuration()
     return sendResponse(res, 200, miningDetail);
 })
+export const getLeaderboardList = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const miningDetail = await MiningService.getMiningData()
+    return sendResponse(res, 200, miningDetail);
+})

@@ -1,8 +1,9 @@
-import { Schema, model, Document } from 'mongoose';
+import { Schema, model, Document, ObjectId } from 'mongoose';
 
 // Define the interface for the document
 interface IPlan extends Document {
-  tier: string;
+  _id:ObjectId;
+  tier: number;
   name: string;
   codename: string;
   price: number;
@@ -13,7 +14,7 @@ interface IPlan extends Document {
 
 // Define the schema
 const PlanSchema = new Schema<IPlan>({
-  tier: { type: String, required: true },
+  tier: { type: Number, required: true },
   name: { type: String, required: true },
   codename: { type: String, required: true },
   price: { type: Number, required: true },

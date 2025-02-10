@@ -9,6 +9,7 @@ export interface IUser extends Document {
   email: string;
   password: string;
   groupId: ObjectId;
+  planId: ObjectId;
   isActive: boolean;
   otp: number | undefined;
   otp_expire: Date | undefined;
@@ -27,6 +28,9 @@ const userSchema = new Schema<IUser>({
     unique: true,
     sparse: true,
     validate: validator.isEmail,
+  },
+  planId: {
+    type: Schema.Types.ObjectId,
   },
   password: {
     type: String,

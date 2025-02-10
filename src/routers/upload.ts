@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { isAuthenticated } from "../middlewares/auth";
-import { addFile, deleteFile, getAllFiles, getChatHistory, getChatHistoryTrade, getFile, sendChat, sendChatTrade, summarizeArticle, updateMining, uploadFile } from "../controllers/upload";
+import { addFile, deleteFile, generateGame, getAllFiles, getChatHistory, getChatHistoryTrade, getFile, sendChat, sendChatTrade, summarizeArticle, updateMining, uploadFile } from "../controllers/upload";
 import { multerUpload } from "../config/multerUpload";
 // import { isFeatureAllowed } from "../middlewares/featureLimit";
 // import { isSubscribed } from "../middlewares/payment";
@@ -20,5 +20,6 @@ router.get("/get-chat-history/:uploadId", isAuthenticated, getChatHistory);
 
 router.post("/get_chat_history_trade_data", isAuthenticated, getChatHistoryTrade);
 router.post("/chat_with_trade_data", isAuthenticated, sendChatTrade);
+router.post("/generate_game", isAuthenticated, generateGame);
 
 export default router;

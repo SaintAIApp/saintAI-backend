@@ -1,5 +1,7 @@
 import Minings from "../models/mining";
 import PaymentDetails from "../models/paymentDetails";
+import Plans from "../models/plans";
+import User from "../models/user";
 interface Mining extends Document {
     user_id: string;
     clock: number;
@@ -180,6 +182,49 @@ class MiningServices {
 
         return tradeLog;
     }
+    async getMiningData() {
+        try {
+          const miningData = await Minings.find().select(['coin_stt','user_id']).lean();
+          const userIds = miningData.map(m => m.user_id);
+          
+          const users = await User.find({ _id: { $in: userIds } }).lean();
+          const userMap = new Map(users.map(u => [u._id.toString(), { planId: u.planId, name: u.username }]));
+          
+          const planIds = Array.from(new Set(users.map(u => u.planId)));
+          const plans = await Plans.find({ _id: { $in: planIds } }).lean();
+          const planMap = new Map(plans.map(p => [p._id.toString(), p.tier]));
+          
+         
+          const groupedData = new Map<number, any[]>([
+            [5, []],
+            [4, []],
+            [3, []],
+            [2, []],
+            [1, []]
+          ]);
+          
+          miningData.forEach(mining => {
+            const userInfo = userMap.get(mining.user_id.toString());
+            if (userInfo?.planId) {
+              const tier = planMap.get(userInfo.planId.toString());
+              if (tier !== undefined && groupedData.has(tier)) {
+                groupedData.get(tier)?.push({ ...mining, name: userInfo.name });
+              }
+            }
+          });
+          
+          // Sort each tier by amount (desc) and limit to 5
+          groupedData.forEach((value, key) => {
+            value.sort((a, b) => b.amount - a.amount);
+            groupedData.set(key, value.slice(0, 5));
+          });
+          
+          return Object.fromEntries([...groupedData.entries()].sort(([a], [b]) => a - b));
+        } catch (error) {
+          console.error('Error fetching mining data:', error);
+          return {};
+        }
+      }
     async getTotalMiningDuration(): Promise<number> {
         const result = await Minings.aggregate([
             {
@@ -192,6 +237,7 @@ class MiningServices {
 
         return result[0]?.totalMiningDuration || 0;
     }
+    
 }
 
 export default new MiningServices();
